@@ -1,4 +1,4 @@
-use moxy_token::{Group, Lit, Span, Spanner, ToTokens, TokenStream};
+use moxy_token::{Group, Keyword, Lit, Span, Spanner, ToTokens, TokenStream};
 
 use crate::*;
 
@@ -33,7 +33,7 @@ impl Meta {
 
         let parser = Parser::from_tokens(&group.tokens);
 
-        while Path::peek(parser.cursor()) {
+        while Self::peek(parser.cursor()) {
             let meta = <_ as Parse>::parse(&parser)?;
             parse(&meta)?;
         }
@@ -72,18 +72,24 @@ impl ToTokens for Meta {
 
 impl Parse for Meta {
     fn peek(cursor: Cursor<'_>) -> bool {
-        Path::peek(cursor)
+        Path::peek(cursor) || Keyword::peek(cursor)
     }
 
     fn parse(parser: &Parser) -> Result<Self, ParseError> {
+        let path = if Path::peek(parser.cursor()) {
+            <_ as Parse>::parse(parser)?
+        } else {
+            Path::from(parser.parse_ident_any()?)
+        };
+
         Ok(Self {
-            path: <_ as Parse>::parse(parser)?,
+            path,
             content: <_ as Parse>::parse(parser)?,
         })
     }
 
     fn skip(cursor: Cursor<'_>) -> Option<Cursor<'_>> {
-        Path::skip(cursor)?;
+        Path::skip(cursor).or_else(|| Keyword::skip(cursor))?;
         MetaContent::skip(cursor)
     }
 }

@@ -1,4 +1,4 @@
-use moxy::ast::{Expr, Type};
+use moxy::ast::{Expr, Path, Type};
 use moxy::token::Spanner;
 
 #[test]
@@ -75,4 +75,15 @@ fn qualified_self_paths_render_complete_valid_syntax() {
     assert!(ty.is_path());
     assert!(!ty.span().is_empty());
     assert_eq!(moxy::fmt!(&ty).unwrap(), "<T as Trait>::Assoc");
+}
+
+#[test]
+fn reserved_keywords_are_not_path_segments() {
+    for source in ["if", "while", "match", "return", "a::if"] {
+        assert!(moxy::parse!(source as Path).is_err(), "{source}");
+    }
+
+    for source in ["self", "Self", "super", "crate", "default", "union", "crate::a"] {
+        assert!(moxy::parse!(source as Path).is_ok(), "{source}");
+    }
 }

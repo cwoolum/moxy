@@ -1,4 +1,4 @@
-use moxy_token::{Ident, Keyword, Span, Spanner, ToTokenStream, ToTokens, TokenStream};
+use moxy_token::{Ident, Keyword, Span, Spanner, ToTokenStream, ToTokens, TokenStream, TokenTree};
 
 use crate::*;
 
@@ -11,12 +11,27 @@ pub struct PathSegment {
     pub args: path::PathArguments,
 }
 
+/// Whether `keyword` can name a path segment: the path keywords and the weak
+/// keywords that are ordinary identifiers outside their own syntax.
+fn is_segment_keyword(keyword: &Keyword) -> bool {
+    matches!(
+        keyword.as_str(),
+        "self" | "Self" | "super" | "crate" | "auto" | "default" | "macro_rules" | "raw" | "safe" | "union"
+    )
+}
+
 impl Parse for PathSegment {
     fn peek(cursor: Cursor<'_>) -> bool {
-        Keyword::peek(cursor) || Ident::peek(cursor)
+        Ident::peek(cursor) || matches!(cursor.curr(), Some(TokenTree::Keyword(keyword)) if is_segment_keyword(keyword))
     }
 
     fn parse(parser: &Parser) -> Result<Self, ParseError> {
+        if let Some(TokenTree::Keyword(keyword)) = parser.curr()
+            && !is_segment_keyword(keyword)
+        {
+            return Err(parser.error(format!("expected path segment, received keyword `{keyword}`")));
+        }
+
         let ident = parser.parse_ident_any()?;
         let is_fn = matches!(ident.text(), "Fn" | "FnMut" | "FnOnce");
 
@@ -37,8 +52,10 @@ impl Parse for PathSegment {
 
         cursor = if Ident::peek(cursor) {
             Ident::skip(cursor)?
-        } else {
+        } else if Self::peek(cursor) {
             Keyword::skip(cursor)?
+        } else {
+            return None;
         };
 
         if is_fn && ParenArguments::peek(cursor) {
