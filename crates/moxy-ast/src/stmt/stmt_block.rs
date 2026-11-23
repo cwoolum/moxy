@@ -18,7 +18,7 @@ impl Parse for StmtBlock {
 
     fn parse(parser: &Parser) -> Result<Self, ParseError> {
         Ok(Self {
-            stmts: Delimited::<Vec<Stmt>>::parse_brace(parser)?,
+            stmts: Delimited::parse_brace_with(parser, |parser| parser.parse_until_empty())?,
         })
     }
 

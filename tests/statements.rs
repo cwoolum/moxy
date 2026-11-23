@@ -39,3 +39,9 @@ fn malformed_local_syntax_returns_a_specific_parse_failure() {
     let result: Result<Stmt, _> = moxy::parse!("let = 1;");
     assert_eq!(result.unwrap_err().message(), "expected pattern");
 }
+
+#[test]
+fn blocks_report_the_first_statement_they_cannot_parse() {
+    let statement: Result<Stmt, _> = moxy::parse!("{ a; let = 1; c }");
+    assert_eq!(statement.unwrap_err().message(), "expected pattern");
+}
