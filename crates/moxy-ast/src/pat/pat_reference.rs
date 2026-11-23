@@ -36,7 +36,7 @@ impl Parse for PatReference {
             attrs: <_ as Parse>::parse(parser)?,
             and: <_ as Parse>::parse(parser)?,
             mutability: <_ as Parse>::parse(parser)?,
-            pat: <_ as Parse>::parse(parser)?,
+            pat: Box::new(pat::parse::single(parser)?),
         })
     }
 
@@ -44,7 +44,7 @@ impl Parse for PatReference {
         cursor = Attributes::skip(cursor)?;
         cursor = <Token![&]>::skip(cursor)?;
         cursor = Option::<Token![mut]>::skip(cursor)?;
-        Pattern::skip(cursor)
+        pat::skip::single(cursor)
     }
 }
 

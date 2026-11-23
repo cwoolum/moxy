@@ -1,4 +1,4 @@
-use moxy::ast::{PatType, Pattern};
+use moxy::ast::{Expr, PatType, Pattern};
 use moxy::token::{Spanner, ToTokenStream};
 
 #[test]
@@ -58,4 +58,17 @@ fn invalid_tuple_indices_are_rejected_as_member_patterns() {
         let result = moxy::parse!(source as moxy::ast::Member);
         debug_assert!(result.is_err(), "accepted invalid tuple index {source} => {result:#?}");
     }
+}
+
+#[test]
+fn reference_patterns_bind_tighter_than_alternatives() {
+    let pattern: Pattern = moxy::parse!("&a | &b").unwrap();
+    let Pattern::Or(or) = &pattern else {
+        panic!("expected an or-pattern");
+    };
+    assert_eq!(or.cases.len(), 2);
+    assert!(or.cases.iter().all(Pattern::is_reference));
+
+    let closure: Expr = moxy::parse!("|&x| x").unwrap();
+    assert!(closure.is_closure());
 }
