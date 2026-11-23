@@ -12,6 +12,21 @@ pub(crate) fn const_generic_default(parser: &Parser) -> Result<Expr, ParseError>
     expr(parser, ExprContext::CONST_GENERIC_DEFAULT)
 }
 
+pub(super) fn arm_body(parser: &Parser) -> Result<Expr, ParseError> {
+    if peek::block_like(Attributes::skip(parser.cursor()).unwrap_or(parser.cursor())) {
+        let fork = parser.fork();
+        let attrs = <_ as Parse>::parse(&fork)?;
+        let body = primary(&fork, attrs, ExprContext::NORMAL)?;
+
+        if !<Token![.]>::peek(fork.cursor()) && !<Token![?]>::peek(fork.cursor()) {
+            parser.seek(&fork);
+            return Ok(body);
+        }
+    }
+
+    expr(parser, ExprContext::NORMAL)
+}
+
 fn optional_expr(parser: &Parser, context: ExprContext) -> Result<Option<Box<Expr>>, ParseError> {
     if peek::expr(parser.cursor(), context) {
         Ok(Some(Box::new(expr(parser, context)?)))

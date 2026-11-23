@@ -11,6 +11,20 @@ pub(super) fn expr(cursor: Cursor<'_>, context: ExprContext) -> Option<Cursor<'_
     }
 }
 
+pub(super) fn arm_body(cursor: Cursor<'_>) -> Option<Cursor<'_>> {
+    let start = Attributes::skip(cursor)?;
+
+    if peek::block_like(start) {
+        let end = primary(start, ExprContext::NORMAL)?;
+
+        if !<Token![.]>::peek(end) && !<Token![?]>::peek(end) {
+            return Some(end);
+        }
+    }
+
+    expr(cursor, ExprContext::NORMAL)
+}
+
 fn optional_expr(cursor: Cursor<'_>, context: ExprContext) -> Option<Cursor<'_>> {
     if peek::expr(cursor, context) {
         expr(cursor, context)

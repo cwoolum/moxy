@@ -1200,6 +1200,27 @@
             "fixture_directory": "fixtures/grammar/expressions/match"
         },
         {
+            "id": "expressions.match-block-arms",
+            "reference": {
+                "production": "Expressions > Match expressions",
+                "anchor": "https://doc.rust-lang.org/reference/grammar.html"
+            },
+            "baseline": {
+                "toolchain": "stable",
+                "edition": "2024"
+            },
+            "upstream": {
+                "repository": "rust-lang/rust",
+                "commit": "2350b22a89d30fe814a299a73c9ab83c72cafaf3",
+                "paths": [
+                    "tests/ui/parser/"
+                ]
+            },
+            "parse_root": "expr",
+            "support_expectation": "moxy_accepts",
+            "fixture_directory": "fixtures/grammar/expressions/match-block-arms"
+        },
+        {
             "id": "expressions.loop",
             "reference": {
                 "production": "Expressions > Loop expressions",

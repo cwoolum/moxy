@@ -1,5 +1,5 @@
-use moxy::ast::Expr;
-use moxy::token::{Spanner, ToTokenStream};
+use moxy::ast::{Expr, Parse, Parser};
+use moxy::token::{Spanner, ToTokenStream, TokenStream};
 
 #[test]
 fn binary_and_unary_operators_complete_the_expression_pipeline() {
@@ -56,6 +56,16 @@ fn control_flow_expressions_preserve_conditions_arms_and_bodies() {
         moxy::fmt!(&matching).unwrap(),
         "match value {\n\tSome(x) if x > 0 => x,\n\tNone => 0,\n\t_ => 1,\n}"
     );
+}
+
+#[test]
+fn block_arm_bodies_end_the_arm_without_a_comma() {
+    let source = "match value { (0, _) => {} [first] => unsafe { first } &rest => {}.len() }";
+    let tokens: TokenStream = source.parse().unwrap();
+    assert!(Expr::skip(Parser::from_tokens(&tokens).cursor()).unwrap().is_empty());
+
+    let matching: Expr = moxy::parse!(source).unwrap();
+    assert_eq!(matching.as_match().unwrap().arms.len(), 3);
 }
 
 #[test]
