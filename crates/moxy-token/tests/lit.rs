@@ -1,4 +1,4 @@
-use moxy_token::TokenStream;
+use moxy_token::{Lit, TokenStream};
 
 #[test]
 fn accept() {
@@ -38,5 +38,23 @@ fn reject() {
         let mut iter = tokens.into_iter();
         let token = iter.next().expect("no tokens scanned");
         assert!(!token.is_literal());
+    }
+}
+
+#[test]
+fn suffixed_integer_constructors() {
+    for (lit, repr) in [
+        (Lit::u8_suffixed(7), "7u8"),
+        (Lit::u16_suffixed(7), "7u16"),
+        (Lit::u32_suffixed(7), "7u32"),
+        (Lit::u64_suffixed(7), "7u64"),
+        (Lit::usize_suffixed(7), "7usize"),
+        (Lit::i8_suffixed(7), "7i8"),
+        (Lit::i16_suffixed(7), "7i16"),
+        (Lit::i32_suffixed(7), "7i32"),
+        (Lit::i64_suffixed(7), "7i64"),
+        (Lit::isize_suffixed(7), "7isize"),
+    ] {
+        assert_eq!(lit.to_string(), repr);
     }
 }
