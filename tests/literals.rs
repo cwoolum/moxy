@@ -215,3 +215,12 @@ fn boolean_literals_bridge_back_to_proc_macro_identifiers() {
         );
     }
 }
+
+#[test]
+fn literals_parse_through_invisible_groups() {
+    use moxy::token::{Delim, Group, LitStr, TokenStream, TokenTree};
+
+    let tokens = TokenStream::from(vec![TokenTree::Group(Group::new(Delim::None, "\"x\"".parse().unwrap()))]);
+    let literal: LitStr = moxy::parse!(tokens).unwrap();
+    assert_eq!(literal.value(), "x");
+}

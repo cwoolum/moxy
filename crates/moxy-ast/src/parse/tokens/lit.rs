@@ -14,6 +14,9 @@ impl Parse for Lit {
     fn parse(parser: &Parser) -> Result<Self, ParseError> {
         match parser.advance() {
             Some(TokenTree::Literal(v)) => Ok(v.clone()),
+            Some(TokenTree::Group(group)) if group.delim == Delim::None && group.tokens.len() == 1 => {
+                <_ as Parse>::parse(&Parser::from_tokens(&group.tokens))
+            }
             _ => Err(parser.error("expected literal")),
         }
     }
