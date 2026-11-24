@@ -382,11 +382,11 @@ impl Parse for Semi {
 
 impl Parse for Colon {
     fn peek(cursor: Cursor<'_>) -> bool {
-        let Some(next) = cursor.curr() else {
+        let Some(TokenTree::Punct(Punct::Colon(colon))) = cursor.curr() else {
             return false;
         };
 
-        matches!(next, TokenTree::Punct(Punct::Colon(_)))
+        !colon.spacing().is_joint() || !matches!(cursor.next(), Some(TokenTree::Punct(Punct::Colon(_))))
     }
 
     fn parse(parser: &Parser) -> Result<Self, ParseError> {

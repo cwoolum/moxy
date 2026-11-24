@@ -100,3 +100,11 @@ fn never_infer_and_parenthesized_types_preserve_variants() {
         assert_eq!(moxy::fmt!(&ty).unwrap(), expected);
     }
 }
+
+#[test]
+fn relative_paths_in_generic_arguments_are_not_constraints() {
+    for source in ["Option<std::string::String>", "Iterator<Item: a::B>"] {
+        let ty: Type = moxy::parse!(source).unwrap();
+        assert_eq!(moxy::fmt!(&ty).unwrap(), source);
+    }
+}
