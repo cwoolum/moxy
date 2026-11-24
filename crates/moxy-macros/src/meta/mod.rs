@@ -69,7 +69,7 @@ pub fn expand(tokens: TokenStream) -> TokenStream {
 
     moxy::template! {
         impl {{ impl_generics }} ::moxy::ast::FromMeta for {{ ident }} {{ type_generics }} {{ where_clause }} {
-            fn from_meta(meta: &::moxy::ast::Meta) -> Result<Self, ::moxy::ast::ParseError> {
+            fn from_meta(meta: &::moxy::ast::Meta) -> ::std::result::Result<Self, ::moxy::ast::ParseError> {
                 let parser = match &meta.content {
                     ::moxy::ast::MetaContent::List(group) => &::moxy::ast::Parser::from_tokens(&group.tokens),
                     _ => return Err(::moxy::ast::ParseError::new(
