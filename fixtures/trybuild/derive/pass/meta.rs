@@ -60,6 +60,12 @@ enum MessageVolume {
     },
 }
 
+#[derive(moxy::FromMeta, Debug)]
+struct Optional {
+    #[meta(default)]
+    dry_run: Option<bool>,
+}
+
 #[derive(moxy::FromMeta, Debug, PartialEq, Eq)]
 enum Volume {
     Low,
@@ -133,4 +139,7 @@ fn main() {
 
     let named: moxy::ast::Meta = moxy::parse!("message_volume(named())").unwrap();
     assert_eq!(named.parse::<MessageVolume>().unwrap_err().message(), "nested value at value");
+
+    let malformed: moxy::ast::Meta = moxy::parse!("optional(dry_run = \"oops\")").unwrap();
+    assert_eq!(malformed.parse::<Optional>().unwrap_err().message(), "expected bool");
 }

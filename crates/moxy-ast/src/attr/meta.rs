@@ -198,10 +198,7 @@ impl<T: FromMeta> FromMeta for std::sync::Arc<T> {
 
 impl<T: FromMeta> FromMeta for Option<T> {
     fn from_meta(meta: &Meta) -> Result<Self, ParseError> {
-        match T::from_meta(meta) {
-            Err(_) => Ok(Self::None),
-            Ok(v) => Ok(Self::Some(v)),
-        }
+        T::from_meta(meta).map(Self::Some)
     }
 }
 
