@@ -126,7 +126,7 @@ fn main() {
     assert_eq!(missing.parse::<Messages>().unwrap_err().message(), "field named at named");
 
     let duplicate: moxy::ast::Meta = moxy::parse!("message(named = true, named = false)").unwrap();
-    assert_eq!(duplicate.parse::<Messages>().unwrap_err().message(), "field named at named");
+    assert_eq!(duplicate.parse::<Messages>().unwrap_err().message(), "duplicate meta argument");
 
     let unit: moxy::ast::Meta = moxy::parse!("message_volume(custom)").unwrap();
     assert!(matches!(unit.parse::<MessageVolume>().unwrap(), MessageVolume::Custom(true)));

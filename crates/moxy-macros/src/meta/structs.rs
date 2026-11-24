@@ -41,7 +41,7 @@ pub fn expand(target: &moxy::ast::ItemStruct) -> TokenStream {
                 if name == {{ field.key }} {
                     if {{ field.binding }}.is_some() {
                         return Err({{ parse_error(
-                            field.message.as_ref(),
+                            None,
                             &field.key,
                             moxy::template! { ::moxy::token::Spanner::span(&entry) },
                             moxy::template! { ::moxy::token::ToTokenStream::to_token_stream(&entry.path) },
