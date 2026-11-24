@@ -60,6 +60,12 @@ enum MessageVolume {
     },
 }
 
+#[derive(moxy::FromMeta, Debug)]
+struct PlainMessage {
+    #[meta(message = "name is required")]
+    name: bool,
+}
+
 #[derive(moxy::FromMeta, Debug, PartialEq, Eq)]
 enum Volume {
     Low,
@@ -133,4 +139,7 @@ fn main() {
 
     let named: moxy::ast::Meta = moxy::parse!("message_volume(named())").unwrap();
     assert_eq!(named.parse::<MessageVolume>().unwrap_err().message(), "nested value at value");
+
+    let plain: moxy::ast::Meta = moxy::parse!("plain()").unwrap();
+    assert_eq!(plain.parse::<PlainMessage>().unwrap_err().message(), "name is required");
 }

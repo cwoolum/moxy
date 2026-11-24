@@ -10,14 +10,11 @@ use moxy_token::{Ident, LitStr, Spanner, ToTokenStream, TokenStream};
 fn parse_error(message: Option<&LitStr>, ident: &LitStr, span: TokenStream, path: TokenStream, fallback: &str) -> TokenStream {
     match message {
         Some(message) => moxy::template! {
-            ::moxy::ast::ParseError::new(
-                {{ span }},
-                ::std::format!(
-                    {{ message }},
-                    ident = {{ ident }},
-                    path = {{ path }},
-                ),
-            )
+            ::moxy::ast::ParseError::new({{ span }}, {
+                #[allow(unused_variables)]
+                let (ident, path) = ({{ ident }}, {{ path }});
+                ::std::format!({{ message }})
+            })
         },
         None => {
             let fallback = LitStr::new(fallback, moxy::token::Span::call_site());
