@@ -138,3 +138,9 @@ fn field_shorthand_preserves_bindings_and_tokens() {
         assert!(moxy::parse!(source as Pattern).is_err(), "{source}");
     }
 }
+
+#[test]
+fn built_compound_puncts_render_joined() {
+    assert_eq!(<Token![::]>::default().to_token_stream().to_string(), "::");
+    assert_eq!(<Token![..=]>::new(Span::call_site()).to_token_stream().to_string(), "..=");
+}
