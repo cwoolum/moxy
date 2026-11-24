@@ -162,6 +162,7 @@ fn escape(c: Cursor<'_>) -> Result<Cursor<'_>, LexError> {
     match c.first() {
         None => c.error().into(),
         Some('n' | 'r' | 't' | '\\' | '\'' | '"' | '0') => Ok(c.advance()),
+        Some('\n') => Ok(c.skip_while(is_continuation_whitespace)),
         Some('x') => {
             let c = c.advance();
             let c = hex_digit(c)?;
@@ -192,6 +193,10 @@ fn escape(c: Cursor<'_>) -> Result<Cursor<'_>, LexError> {
     }
 }
 
+fn is_continuation_whitespace(c: char) -> bool {
+    matches!(c, ' ' | '\t' | '\n' | '\r')
+}
+
 fn hex_digit(c: Cursor<'_>) -> Result<Cursor<'_>, LexError> {
     match c.first() {
         Some(ch) if ch.is_ascii_hexdigit() => Ok(c.advance()),
@@ -214,7 +219,9 @@ fn decode_string_body(repr: &str) -> Option<String> {
     let mut chars = inner.chars();
 
     while let Some(c) = chars.next() {
-        if c == '\\' {
+        if c == '\\' && chars.as_str().starts_with('\n') {
+            chars = chars.as_str().trim_start_matches(is_continuation_whitespace).chars();
+        } else if c == '\\' {
             out.push(decode_escape(&mut chars)?);
         } else {
             out.push(c);

@@ -1,4 +1,4 @@
-use moxy_token::TokenStream;
+use moxy_token::{Lit, TokenStream};
 
 #[test]
 fn accept() {
@@ -38,5 +38,22 @@ fn reject() {
         let mut iter = tokens.into_iter();
         let token = iter.next().expect("no tokens scanned");
         assert!(!token.is_literal());
+    }
+}
+
+#[test]
+fn line_continuation() {
+    for source in ["\"a \\\n   b\"", "b\"a \\\n   b\"", "c\"a \\\n   b\""] {
+        let tokens: TokenStream = source.parse().unwrap_or_else(|_| panic!("{source:?} could not be scanned"));
+        let token = tokens.into_iter().next().expect("no tokens scanned");
+
+        let value = match token.as_literal().expect("expected literal") {
+            Lit::Str(v) => v.value().as_bytes().to_vec(),
+            Lit::ByteStr(v) => v.value().to_vec(),
+            Lit::CStr(v) => v.value().to_vec(),
+            other => panic!("{source:?} scanned as {other:?}"),
+        };
+
+        assert_eq!(value, b"a b", "{source:?}");
     }
 }
