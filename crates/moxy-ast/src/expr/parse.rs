@@ -304,7 +304,10 @@ fn primary(parser: &Parser, attrs: Attributes, context: ExprContext) -> Result<E
         let cond = Box::new(expr(parser, ExprContext::EARLY)?);
         let then_branch = <_ as Parse>::parse(parser)?;
         let (else_keyword, else_branch) = if <Token![else]>::peek(parser.cursor()) {
-            (Some(<_ as Parse>::parse(parser)?), Some(<_ as Parse>::parse(parser)?))
+            (
+                Some(<_ as Parse>::parse(parser)?),
+                Some(Box::new(primary(parser, Default::default(), ExprContext::NORMAL)?)),
+            )
         } else {
             (None, None)
         };

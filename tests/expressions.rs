@@ -59,6 +59,12 @@ fn control_flow_expressions_preserve_conditions_arms_and_bodies() {
 }
 
 #[test]
+fn else_branches_end_at_their_block() {
+    let expr: Expr = moxy::parse!("if a { 1 } else { 2 } - 1").unwrap();
+    assert!(expr.is_binary());
+}
+
+#[test]
 fn closures_loops_and_jumps_render_exact_rust() {
     for (source, expected, expected_kind) in [
         ("move |x: i32| -> i32 { x + 1 }", "move |x: i32| -> i32 {\n\tx + 1\n}", 0),

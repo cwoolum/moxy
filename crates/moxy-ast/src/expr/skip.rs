@@ -140,7 +140,7 @@ fn primary(mut cursor: Cursor<'_>, context: ExprContext) -> Option<Cursor<'_>> {
 
         if <Token![else]>::peek(cursor) {
             cursor = <Token![else]>::skip(cursor)?;
-            cursor = Expr::skip(cursor)?;
+            cursor = primary(cursor, ExprContext::NORMAL)?;
         }
 
         return Some(cursor);
