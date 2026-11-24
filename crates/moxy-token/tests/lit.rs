@@ -1,4 +1,4 @@
-use moxy_token::TokenStream;
+use moxy_token::{Lit, TokenStream};
 
 #[test]
 fn accept() {
@@ -38,5 +38,22 @@ fn reject() {
         let mut iter = tokens.into_iter();
         let token = iter.next().expect("no tokens scanned");
         assert!(!token.is_literal());
+    }
+}
+
+#[test]
+fn unicode_escape_underscores() {
+    for source in ["\"\\u{00_41}\"", "'\\u{00_41}'", "c\"\\u{00_41}\""] {
+        let tokens: TokenStream = source.parse().unwrap_or_else(|_| panic!("{source:?} could not be scanned"));
+        let token = tokens.into_iter().next().expect("no tokens scanned");
+
+        let value = match token.as_literal().expect("expected literal") {
+            Lit::Str(v) => v.value().to_string(),
+            Lit::Char(v) => v.value().to_string(),
+            Lit::CStr(v) => String::from_utf8_lossy(v.value()).into_owned(),
+            other => panic!("{source:?} scanned as {other:?}"),
+        };
+
+        assert_eq!(value, "A", "{source:?}");
     }
 }

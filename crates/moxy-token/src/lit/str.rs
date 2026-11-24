@@ -189,6 +189,7 @@ fn escape(c: Cursor<'_>) -> Result<Cursor<'_>, LexError> {
             loop {
                 match c.first() {
                     Some('}') if count > 0 => return Ok(c.advance()),
+                    Some('_') if count > 0 => c = c.advance(),
                     Some(ch) if ch.is_ascii_hexdigit() && count < 6 => {
                         count += 1;
                         c = c.advance();
@@ -256,6 +257,9 @@ fn decode_escape(chars: &mut std::str::Chars<'_>) -> Option<char> {
             for c in chars.by_ref() {
                 if c == '}' {
                     break;
+                }
+                if c == '_' {
+                    continue;
                 }
                 value = value.checked_mul(16)?.checked_add(c.to_digit(16)?)?;
                 count += 1;
